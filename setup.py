@@ -14,5 +14,12 @@ setup(name='gym_connect_four',
                         'Pillow',
                         'pygame>=1.9.6',
                         'tqdm',
-                        'plotly']
-      )
+                        'plotly'],
+      extras_require={
+            "dev": [
+                  "black",
+                  "pylama",
+                  "rope"
+            ]
+      }
+)
