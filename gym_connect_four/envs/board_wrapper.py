@@ -1,5 +1,5 @@
 
-from gym_connect_four.envs.connect_four_env import ConnectFourEnv
+from gym_connect_four.envs.connect_four_minimal import ConnectFourEnv
 
 
 class ConnectFourWrapper(ConnectFourEnv):
@@ -31,17 +31,9 @@ c = ConnectFourWrapper(board_shape=(4, 4))
 
 c.step(2)
 c.step(1)
-
-c.board
-
-c.get_current_player()
-
-c.available_moves()
-
-c.render()
-
-
-c.is_win_state()
-c.LOSS_REWARD
-
-c.board
+c.step(2)
+c.step(1)
+c.step(2)
+c.step(1)
+c.step(2)
+print(c.step(1))
