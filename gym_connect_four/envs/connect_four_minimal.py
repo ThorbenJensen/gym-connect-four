@@ -3,7 +3,6 @@ from typing import Tuple, NamedTuple, Optional
 
 import gym
 import numpy as np
-from gym import spaces
 
 
 @unique
@@ -79,17 +78,12 @@ class ConnectFourEnv(gym.Env):
         self.board_shape = board_shape
         self.__board = np.zeros(self.board_shape, dtype=int)
 
-        self.observation_space = spaces.Box(
-            low=-1, high=1, shape=board_shape, dtype=int
-        )
-        self.action_space = spaces.Discrete(board_shape[1])
-
         self.__current_player = 1
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
         step_result = self._step(action)
         reward = step_result.get_reward(self.__current_player)
-        done = step_result.is_done()
+        done = self.is_win_state() or (self.available_moves() == set()) 
         return self.__board.copy(), reward, done, {}
 
     def _step(self, action: int) -> StepResult:
