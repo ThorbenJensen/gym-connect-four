@@ -3,11 +3,7 @@ from typing import Tuple, NamedTuple, Optional
 
 import gym
 import numpy as np
-import pygame
-from gym import error
 from gym import spaces
-
-from gym_connect_four.envs.render import render_board
 
 
 @unique
@@ -90,12 +86,6 @@ class ConnectFourEnv(gym.Env):
 
         self.__current_player = 1
 
-        # self.__player_color = 1
-        # self.__screen = None
-        self.__window_width = window_width
-        self.__window_height = window_height
-        self.__rendered_board = self._update_board_render()
-
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
         step_result = self._step(action)
         reward = step_result.get_reward(self.__current_player)
@@ -137,18 +127,10 @@ class ConnectFourEnv(gym.Env):
             self.__board = np.zeros(self.board_shape, dtype=int)
         else:
             self.__board = board
-        self.__rendered_board = self._update_board_render()
         return self.board
 
     def is_valid_action(self, action: int) -> bool:
         return self.__board[0][action] == 0
-
-    def _update_board_render(self) -> np.ndarray:
-        return render_board(
-            self.__board,
-            image_width=self.__window_width,
-            image_height=self.__window_height,
-        )
 
     def is_win_state(self) -> bool:
         # Test rows

@@ -31,9 +31,13 @@ c = ConnectFourWrapper(board_shape=(4, 4))
 
 c.step(2)
 c.step(1)
+c.step(3)
+c.step(0)
 c.step(2)
 c.step(1)
-c.step(2)
-c.step(1)
-c.step(2)
-print(c.step(1))
+
+c.available_moves()
+
+print(c.is_win_state())
+print(c.step(2))
+print(c.is_win_state())
