@@ -1,22 +1,8 @@
 from enum import Enum, unique
-from typing import Tuple, NamedTuple, Optional
+from typing import Tuple, Optional
 
 import gym
 import numpy as np
-
-
-@unique
-class ResultType(Enum):
-    NONE = None
-    DRAW = 0
-    WIN1 = 1
-    WIN2 = -1
-
-    def __eq__(self, other):
-        """
-        Need to implement this due to an unfixed bug in Python since 2017: https://bugs.python.org/issue30545
-        """
-        return self.value == other.value
 
 
 class ConnectFourEnv(gym.Env):
@@ -47,31 +33,6 @@ class ConnectFourEnv(gym.Env):
         An attempt is made to place a piece in an invalid location
     """
 
-    metadata = {"render.modes": ["human"]}
-
-    LOSS_REWARD = -1
-    DEF_REWARD = 0
-    DRAW_REWARD = 0.5
-    WIN_REWARD = 1
-
-    class StepResult(NamedTuple):
-
-        res_type: ResultType
-
-        def get_reward(self, player: int):
-            if self.res_type is ResultType.NONE:
-                return ConnectFourEnv.DEF_REWARD
-            elif self.res_type is ResultType.DRAW:
-                return ConnectFourEnv.DRAW_REWARD
-            else:
-                return {
-                    ResultType.WIN1.value: ConnectFourEnv.WIN_REWARD,
-                    ResultType.WIN2.value: ConnectFourEnv.LOSS_REWARD,
-                }[self.res_type.value * player]
-
-        def is_done(self):
-            return self.res_type != ResultType.NONE
-
     def __init__(self, board_shape=(6, 7), window_width=512, window_height=512):
         super(ConnectFourEnv, self).__init__()
 
@@ -81,35 +42,26 @@ class ConnectFourEnv(gym.Env):
         self.__current_player = 1
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
-        step_result = self._step(action)
-        reward = step_result.get_reward(self.__current_player)
-        done = self.is_win_state() or (self.available_moves() == set()) 
-        return self.__board.copy(), reward, done, {}
-
-    def _step(self, action: int) -> StepResult:
-        result = ResultType.NONE
-
+        # check input
         if not self.is_valid_action(action):
             raise Exception(
                 "Unable to determine a valid move! Maybe invoke at the wrong time?"
             )
-
-        # Check and perform action
+        # perform action
         for index in list(reversed(range(self.board_shape[0]))):
             if self.__board[index][action] == 0:
                 self.__board[index][action] = self.__current_player
                 break
-
-        # Check if board is completely filled
-        if np.count_nonzero(self.__board[0]) == self.board_shape[1]:
-            result = ResultType.DRAW
-        else:
-            # Check win condition
-            if self.is_win_state():
-                result = (
-                    ResultType.WIN1 if self.__current_player == 1 else ResultType.WIN2
-                )
-        return self.StepResult(result)
+        # done if either winner, or no further moves available
+        done = self.is_win_state() or (self.available_moves() == set())
+        # calculate reward (won: 1, draw: 0.5, ongoing: 0)
+        reward = 0
+        if self.is_win_state():
+            reward = 1
+        elif done:
+            reward = 0.5
+        # return tuple
+        return self.__board.copy(), reward, done, {}
 
     @property
     def board(self):
