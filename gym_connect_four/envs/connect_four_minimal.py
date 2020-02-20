@@ -1,4 +1,3 @@
-from enum import Enum, unique
 from typing import Tuple, Optional
 
 import gym
@@ -41,6 +40,15 @@ class ConnectFourEnv(gym.Env):
 
         self.__current_player = 1
 
+    def available_moves(self) -> frozenset:
+        return frozenset(
+            (i for i in range(self.board_shape[1]) if self.is_valid_action(i))
+        )
+
+    @property
+    def board(self):
+        return self.__board.copy()
+
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
         # check input
         if not self.is_valid_action(action):
@@ -62,18 +70,6 @@ class ConnectFourEnv(gym.Env):
             reward = 0.5
         # return tuple
         return self.__board.copy(), reward, done, {}
-
-    @property
-    def board(self):
-        return self.__board.copy()
-
-    def reset(self, board: Optional[np.ndarray] = None) -> np.ndarray:
-        self.__current_player = 1
-        if board is None:
-            self.__board = np.zeros(self.board_shape, dtype=int)
-        else:
-            self.__board = board
-        return self.board
 
     def is_valid_action(self, action: int) -> bool:
         return self.__board[0][action] == 0
@@ -115,7 +111,10 @@ class ConnectFourEnv(gym.Env):
 
         return False
 
-    def available_moves(self) -> frozenset:
-        return frozenset(
-            (i for i in range(self.board_shape[1]) if self.is_valid_action(i))
-        )
+    def reset(self, board: Optional[np.ndarray] = None) -> np.ndarray:
+        self.__current_player = 1
+        if board is None:
+            self.__board = np.zeros(self.board_shape, dtype=int)
+        else:
+            self.__board = board
+        return self.board
