@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from gym_connect_four.envs.connect_four_minimal import ConnectFourEnv
+from connect_four_bot.envs import ConnectFourEnv
 
 BOARD_VALIDATION = np.array([[0, 0, 0, 1, 0, 0, 0],
                     [0, 0, 0, -1, 0, 0, 0],
