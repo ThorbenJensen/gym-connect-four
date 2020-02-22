@@ -116,7 +116,7 @@ class ConnectFourEnv(gym.Env):
         return False
 
     def reset(self, board: Optional[np.ndarray] = None) -> np.ndarray:
-        self.__current_player = 1
+        self._current_player = 1
         if board is None:
             self.__board = np.zeros(self.board_shape, dtype=int)
         else:
