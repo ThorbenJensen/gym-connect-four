@@ -20,8 +20,8 @@ class ConnectFourEnv(gym.Env):
     Reward:
         Reward is 0 for every step.
         If there are no other further steps possible, Reward is 0.5 and termination will occur
-        If it's a win condition, Reward will be 1 and termination will occur
-        If it is an invalid move, Reward will be -1 and termination will occur
+        If player "1" wins, reward is 1 and termination occurs
+        If player "-1" wins, reward is -1 and termination occurs
 
     Starting State:
         All observations are assigned a value of 0
@@ -38,16 +38,17 @@ class ConnectFourEnv(gym.Env):
         self.board_shape = board_shape
         self.__board = np.zeros(self.board_shape, dtype=int)
 
-        self.__current_player = 1
+        self._current_player = 1
+        self._winner = 0
+
+    @property
+    def board(self):
+        return self.__board.copy()
 
     def available_moves(self) -> frozenset:
         return frozenset(
             (i for i in range(self.board_shape[1]) if self.is_valid_action(i))
         )
-
-    @property
-    def board(self):
-        return self.__board.copy()
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, dict]:
         # check input
@@ -58,16 +59,19 @@ class ConnectFourEnv(gym.Env):
         # perform action
         for index in list(reversed(range(self.board_shape[0]))):
             if self.__board[index][action] == 0:
-                self.__board[index][action] = self.__current_player
+                self.__board[index][action] = self._current_player
                 break
-        # done if either winner, or no further moves available
+        # 'done' if there is either a winner, or no further moves available
         done = self.is_win_state() or (self.available_moves() == set())
-        # calculate reward (won: 1, draw: 0.5, ongoing: 0)
-        reward = 0
-        if self.is_win_state():
-            reward = 1
-        elif done:
+        # check if this action lead to a winner
+        if (self._winner == 0) and self.is_win_state():
+            self._winner = self._current_player
+        # calculate reward (ongoing: 0, player 1 won: 1, player -1 won: -1, draw: 0.5)
+        reward = self._winner
+        if done and (self._winner == 0):
             reward = 0.5
+        # change player (for next turn)
+        self._current_player *= -1
         # return tuple
         return self.__board.copy(), reward, done, {}
 
